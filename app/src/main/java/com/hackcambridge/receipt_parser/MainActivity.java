@@ -18,6 +18,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.hackcambridge.cognitive.Parser;
+
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -114,9 +116,8 @@ public class MainActivity extends AppCompatActivity {
 			Buffer buf = ByteBuffer.allocate(imageBitmap.getByteCount());
 			imageBitmap.copyPixelsToBuffer(buf);
 
-			// Do something
-
-			addTransaction(new Transaction("Sainsburys", 2260));
+			Parser.ExtractedData dat = Parser.parse(buf);
+			addTransaction(new Transaction(dat.merchant, dat.totalValue));
 		}
 	}
 
