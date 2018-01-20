@@ -130,9 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
 			Dialog editDialog = showTransactionEditDialog(dialog, "Sainsbury's", 2260);
 			editDialog.show();
-
-
-			//addTransaction(new Transaction("Sainsburys", 2260));
 		}
 	}
 
@@ -161,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 						String resultShopName = shopEntryField.getText().toString();
 						String resultAmount = amountEntryField.getText().toString();
 
-						int amount = (int) (Float.parseFloat(resultAmount) * 100.0);
+						int amount = (int) Math.round(Float.parseFloat(resultAmount) * 100.0);
 
 						addTransaction(new Transaction(resultShopName, amount));
 					}
