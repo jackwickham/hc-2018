@@ -72,12 +72,7 @@ public class MainActivity extends AppCompatActivity {
 		BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
 		navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-		transactions = new ArrayList<>(15);
-		for (int i = 0; i < 15; i++) {
-			transactions.add(new Transaction("Sainsbury's", 2000));
-		}
-
-		// TODO: Load transactions
+		transactions = TransactionDatabase.load();
 
 		transactionAdapter = new TransactionAdapter();
 		transactionListView.setAdapter(transactionAdapter);
@@ -185,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
 		transactions.add(0, transaction);
 		transactionAdapter.notifyItemInserted(0);
 
-		//TODO: Store in database.
+		TransactionDatabase.store(transaction);
 	}
 
 	public void onCameraFabPressed(View view) {

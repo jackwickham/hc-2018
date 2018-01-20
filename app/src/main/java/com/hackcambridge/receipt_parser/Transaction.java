@@ -24,4 +24,8 @@ public class Transaction {
 	public int getPounds() {
 		return amount / 100;
 	}
+
+	public int getAmount() {
+		return amount;
+	}
 }
