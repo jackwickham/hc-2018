@@ -4,12 +4,11 @@
 				android:layout_height="wrap_content"
 				android:paddingLeft="12dp"
 				android:paddingRight="12dp"
-				android:paddingTop="4dp"
-				android:paddingBottom="4dp">
+				android:paddingTop="8dp"
+				android:paddingBottom="8dp">
 	<TextView
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:text="TEST"
 		android:id="@+id/transaction_shop"
 		android:textSize="20sp"
 		android:textColor="@color/colorPrimaryText"
@@ -18,8 +17,8 @@
 	<TextView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="999.99"
 		android:id="@+id/transaction_amount"
 		android:textColor="@color/colorPrimaryText"
-		android:layout_alignParentEnd="true"/>
+		android:layout_alignParentEnd="true"
+		android:layout_centerVertical="true"/>
 </RelativeLayout>
