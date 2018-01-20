@@ -3,13 +3,19 @@ package com.hackcambridge.receipt_parser;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Parcel;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +26,21 @@ import android.widget.TextView;
 
 import com.hackcambridge.cognitive.Parser;
 
+import org.json.JSONException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.RandomAccess;
 
 public class MainActivity extends AppCompatActivity {
 	public static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -41,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 	private RecyclerView transactionListView;
 	private List<Transaction> transactions;
 	private TransactionAdapter adapter;
+	private String currentImagePath;
 
 	private boolean changePage(int selectedPage) {
 		currentView.setVisibility(View.INVISIBLE);
@@ -104,20 +122,64 @@ public class MainActivity extends AppCompatActivity {
 	private void switchToCamera() {
 		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-			startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+			try {
+				File file = createImage();
+				Uri uri = FileProvider.getUriForFile(this, "com.hackcambridge.fileprovider", file);
+				cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+				startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+			}
+			catch (IOException e) {
+				// Ain't nobody got time for that.
+			}
 		}
+	}
+
+	private File createImage() throws IOException {
+		String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+		File storageDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+		File file = new File(storageDir, /*"receipts/" +*/ timestamp + ".bmp");
+		this.currentImagePath = file.getAbsolutePath();
+		return file;
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-			Bundle extras = data.getExtras();
-			Bitmap imageBitmap = (Bitmap) extras.get("data");
-			Buffer buf = ByteBuffer.allocate(imageBitmap.getByteCount());
-			imageBitmap.copyPixelsToBuffer(buf);
+//			Bitmap imageBitmap = (Bitmap) extras.get("data");
+//			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//			imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//			Thread t = new ParserThread(this, stream.toByteArray());
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			Bitmap bmp = BitmapFactory.decodeFile(currentImagePath, options);
+			options.inSampleSize = Math.min(
+					options.outWidth / 3200,
+					options.outHeight / 3200
+			);
+			bmp = BitmapFactory.decodeFile(currentImagePath, options);
+			Parcel parcel = Parcel.obtain();
+			bmp.writeToParcel(parcel, 0);
+			Thread t = new ParserThread(this, parcel.createByteArray());
+			t.start();
+		}
+	}
 
-			Parser.ExtractedData dat = Parser.parse(buf);
-			addTransaction(new Transaction(dat.merchant, dat.totalValue));
+	private static class ParserThread extends Thread {
+		MainActivity activity;
+		byte[] buffer;
+		public ParserThread(MainActivity a, byte[] b) {
+			this.activity = a;
+			this.buffer = b;
+		}
+		@Override
+		public void run() {
+			try {
+				Parser.ExtractedData dat = Parser.parse(this.buffer);
+				this.activity.addTransaction(new Transaction(dat.merchant, dat.totalValue));
+			}
+			catch (IOException | JSONException e) {
+				e.printStackTrace();
+				// Who needs exception handling?
+			}
 		}
 	}
 

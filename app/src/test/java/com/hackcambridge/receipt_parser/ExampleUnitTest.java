@@ -1,6 +1,10 @@
 package com.hackcambridge.receipt_parser;
 
+import com.hackcambridge.cognitive.Endpoint;
+
 import org.junit.Test;
+
+import java.io.File;
 
 import static org.junit.Assert.*;
 
@@ -11,7 +15,9 @@ import static org.junit.Assert.*;
  */
 public class ExampleUnitTest {
 	@Test
-	public void addition_isCorrect() throws Exception {
-		assertEquals(4, 2 + 2);
+	public void fileTest() {
+		File f = new File("C:/...");
+		Endpoint e = new Endpoint();
+		//System.out.println(e.post(f).toString(4));
 	}
 }
