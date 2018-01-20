@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
 			transactions.add(new Transaction("Sainsbury's", 2000));
 		}
 
+		// TODO: Load transactions
+
 		transactionAdapter = new TransactionAdapter();
 		transactionListView.setAdapter(transactionAdapter);
 
@@ -182,6 +184,8 @@ public class MainActivity extends AppCompatActivity {
 	private void addTransaction(Transaction transaction) {
 		transactions.add(0, transaction);
 		transactionAdapter.notifyItemInserted(0);
+
+		//TODO: Store in database.
 	}
 
 	public void onCameraFabPressed(View view) {
