@@ -1,6 +1,6 @@
 package com.hackcambridge.cognitive;
 
-import java.nio.ByteBuffer;
+import java.nio.Buffer;
 
 public class Parser {
 
@@ -13,7 +13,7 @@ public class Parser {
         }
     }
 
-    public static ExtractedData parse(ByteBuffer buffer) {
+    public static ExtractedData parse(Buffer buffer) {
         return new ExtractedData("Sainsbury's", 2260);
     }
 
