@@ -2,4 +2,10 @@
 	<string name="app_name">Receipt Manger</string>
 	<string name="title_transactions">Purchases</string>
 	<string name="title_categories">Categories</string>
+	<string name="shop">Shop</string>
+	<string name="amount">Amount</string>
+	<string name="processing_dialog_title">Processing</string>
+	<string name="processing_dialog_extra">Analysing your image</string>
+	<string name="save">Save</string>
+	<string name="cancel">Cancel</string>
 </resources>
