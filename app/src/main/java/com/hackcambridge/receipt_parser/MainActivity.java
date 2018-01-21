@@ -13,11 +13,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
@@ -31,10 +31,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
 import com.hackcambridge.cognitive.Parser;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
+import com.jjoe64.graphview.helper.StaticLabelsFormatter;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
 
 import org.json.JSONException;
 
@@ -42,9 +48,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 	public static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -70,7 +78,9 @@ public class MainActivity extends AppCompatActivity {
 	private RecyclerView categoryListView;
 	private List<Transaction> categories;
 	private CategoryAdapter categoryAdapter;
+	private LinearLayout graphView;
 	private String currentImagePath;
+	private FloatingActionButton add_new_button;
 
 	private boolean changePage(int selectedPage) {
 		currentView.setVisibility(View.GONE);
@@ -78,11 +88,20 @@ public class MainActivity extends AppCompatActivity {
 		switch (selectedPage) {
 			case R.id.navigation_transactions:
 				transactionListView.setVisibility(View.VISIBLE);
+				add_new_button.setVisibility(View.VISIBLE);
 				currentView = transactionListView;
 				return true;
 			case R.id.navigation_categories:
 				categoryListView.setVisibility(View.VISIBLE);
+				add_new_button.setVisibility(View.GONE);
 				currentView = categoryListView;
+				return true;
+			case R.id.navigation_graph:
+				graphView.setVisibility(View.VISIBLE);
+				add_new_button.setVisibility(View.GONE);
+				graphView.removeAllViews();
+				graphView.addView(getGraphView());
+				currentView = graphView;
 				return true;
 		}
 		return false;
@@ -93,8 +112,11 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		add_new_button = findViewById(R.id.add_new);
+
 		transactionListView = findViewById(R.id.transaction_list);
 		categoryListView = findViewById(R.id.transaction_categories);
+		graphView = findViewById(R.id.transaction_graph);
 		currentView = transactionListView;
 
 		BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -108,11 +130,54 @@ public class MainActivity extends AppCompatActivity {
 		categoryAdapter = new CategoryAdapter();
 		categoryListView.setAdapter(categoryAdapter);
 
+		graphView.addView(getGraphView());
+
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 		transactionListView.setLayoutManager(layoutManager);
 
 		RecyclerView.LayoutManager categoryLayoutManager = new GridLayoutManager(this, 2);
 		categoryListView.setLayoutManager(categoryLayoutManager);
+	}
+
+	public GraphView getGraphView() {
+		Map<Integer, Integer> data = TransactionDatabase.graphData();
+		List<DataPoint> points = new ArrayList<>();
+		double maxY = 1000.0;
+		int minX = Integer.MAX_VALUE;
+		int maxX = 0;
+		for (Map.Entry<Integer, Integer> entry : data.entrySet()) {
+			points.add(new DataPoint(entry.getKey(), entry.getValue()));
+			maxY = Math.max(maxY, Math.ceil(entry.getValue() / 1000.0) * 1000);
+			minX = Math.min(minX, entry.getKey());
+			maxX = Math.max(maxX, entry.getKey());
+		}
+		DataPoint[] pointsArr = new DataPoint[points.size()];
+		points.toArray(pointsArr);
+		BarGraphSeries<DataPoint> series = new BarGraphSeries<>(pointsArr);
+		series.setSpacing(50);
+		GraphView graphView = new GraphView(this);
+		graphView.addSeries(series);
+		graphView.getGridLabelRenderer().setLabelFormatter(new StaticLabelsFormatter(graphView) {
+			@Override
+			public String formatLabel(double value, boolean isValueX) {
+				if (isValueX) {
+					// show day for x values
+					final String[] days = {"Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"};
+					return days[(int) value % 7];//super.formatLabel(value, isValueX);
+				} else {
+					// show currency for y values
+					return "£" + super.formatLabel(value/100, isValueX);
+				}
+			}
+		});
+		Viewport vp = graphView.getViewport();
+		vp.setYAxisBoundsManual(true);
+		vp.setMinY(0.0);
+		vp.setMaxY(maxY);
+		vp.setXAxisBoundsManual(true);
+		vp.setMinX(minX - 1);
+		vp.setMaxX(maxX + 1);
+		return graphView;
 	}
 
 	private class TransactionAdapter extends RecyclerView.Adapter<TransactionListItemHolder> {

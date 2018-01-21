@@ -2,6 +2,7 @@
 	<string name="app_name">Receipt Manger</string>
 	<string name="title_transactions">Purchases</string>
 	<string name="title_categories">Categories</string>
+	<string name="title_graph">Graph</string>
 	<string name="shop">Shop</string>
 	<string name="amount">Amount</string>
 	<string name="processing_dialog_title">Processing</string>
