@@ -6,7 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TransactionDatabase {
 
@@ -82,4 +85,42 @@ public class TransactionDatabase {
         c.close();
         return list;
     }
+
+    public static int categoryTotals(int category){
+        if(database == null){
+            database = SQLiteDatabase.openOrCreateDatabase(getFileName(), null);
+            database.execSQL(CREATE_TABLE_TRANSACTIONS);
+        }
+        String[] cols = {"transID", "SUM(Amount)", "category"};
+        String[] args = {Integer.toString(category)};
+        Cursor c = database.query("transactionTable", cols, "Category = ?", args, null, null, "transID DESC");
+        c.moveToNext();
+        int total = c.getInt(1);
+        c.close();
+        return total;
+    }
+
+    public static Map<Date, Integer> graphData(){
+        if(database == null){
+            database = SQLiteDatabase.openOrCreateDatabase(getFileName(), null);
+            database.execSQL(CREATE_TABLE_TRANSACTIONS);
+        }
+        String[] cols = {"transID", "Amount", "date"};
+        Cursor c = database.query("transactionTable", cols, null, null, null, null, "transID DESC");
+        HashMap<Date, Integer> data = new HashMap<>();
+        while(c.moveToNext()) {
+            int amount = c.getInt(1);
+            long timestamp = c.getInt(2) * 1000L;
+            Date d = new Date(timestamp);
+            if(data.containsKey(d)) {
+                int total = data.get(d) + amount;
+                data.put(d, total);
+            } else {
+                data.put(d, amount);
+            }
+        }
+        c.close();
+        return data;
+    }
 }
+
