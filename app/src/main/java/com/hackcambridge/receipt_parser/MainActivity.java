@@ -334,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
 
 		TransactionDatabase.store(transaction);
 		Merchants.populate(transactions);
-		categoryAdapter.notifyDataSetChanged();
+		categoryAdapter.notifyItemChanged(transaction.getCategory().getId());
 	}
 
 	public void onCameraFabPressed(View view) {
