@@ -31,22 +31,20 @@ import com.hackcambridge.cognitive.Parser;
 
 import org.json.JSONException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.RandomAccess;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 	public static final int REQUEST_IMAGE_CAPTURE = 1;
+
+	private static final int MSG_SUCCESS = 1;
+	private static final int MSG_FAILURE = 2;
+
+	private static final String TAG = "MainActivity";
 
 	private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
 			= new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -171,26 +169,41 @@ public class MainActivity extends AppCompatActivity {
 			Parcel parcel = Parcel.obtain();
 			bmp.writeToParcel(parcel, 0);
 
-			final ProgressDialog dialog = showTransactionProgressDialog();
+			final ProgressDialog processingDialog = showTransactionProgressDialog();
 			Handler h = new Handler(Looper.getMainLooper()) {
 				@Override
 				public void handleMessage(Message msg) {
-					if (msg.what >= 0) {
+					processingDialog.dismiss();
+					if (msg.what == MSG_SUCCESS) {
 						Parser.ExtractedData obj = (Parser.ExtractedData) msg.obj;
-						Dialog editDialog = showTransactionEditDialog(dialog, obj.merchant, obj.totalValue);
+						Dialog editDialog = buildTransactionEditDialog(obj.merchant, obj.totalValue);
 						editDialog.show();
-					}
-					else {
+					} else {
 						// Handle error
-						// TODO: Error dialog - retry/cancel
+						final AlertDialog.Builder errorDialog = new AlertDialog.Builder(MainActivity.this);
+						errorDialog.setTitle(R.string.processing_error_title);
+						errorDialog.setMessage(R.string.processing_error_message);
+						errorDialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.cancel();
+							}
+						});
+						errorDialog.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.dismiss();
+								switchToCamera();
+							}
+						});
+
+						errorDialog.show();
 					}
 				}
 			};
 
 			Thread t = new ParserThread(parcel.createByteArray(), h);
 			t.start();
-
-
 		}
 	}
 
@@ -208,11 +221,11 @@ public class MainActivity extends AppCompatActivity {
 			Message m = Message.obtain(this.handler);
 			try {
 				m.obj = Parser.parse(this.buffer);
-				m.what = 0;
+				m.what = MSG_SUCCESS;
 			} catch (IOException | JSONException e) {
-				Log.e("err", "Error", e);
+				Log.e(TAG, "Error", e);
 				// Who needs exception handling?
-				m.what = -1;
+				m.what = MSG_FAILURE;
 			}
 			m.sendToTarget();
 		}
@@ -222,11 +235,11 @@ public class MainActivity extends AppCompatActivity {
 		return ProgressDialog.show(this, "Processing", "Analysing your image", true, false);
 	}
 
-	private Dialog showTransactionEditDialog(ProgressDialog prevDialog, String shopName, int amount) {
-		if (prevDialog != null) {
-			prevDialog.dismiss();
-		}
+	private static String formatAmount(int amount) {
+		return String.format(Locale.ENGLISH, "%d.%02d", amount / 100, amount % 100);
+	}
 
+	private Dialog buildTransactionEditDialog(String shopName, int amount) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Confirm Entry");
 
@@ -234,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
 		final EditText shopEntryField = ((EditText)dialogView.findViewById(R.id.shop_entry));
 		final EditText amountEntryField = ((EditText)dialogView.findViewById(R.id.amount_entry));
 		shopEntryField.setText(shopName);
-		amountEntryField.setText("45.67");
+		amountEntryField.setText(formatAmount(amount));
 
 		builder.setView(dialogView)
 				.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
