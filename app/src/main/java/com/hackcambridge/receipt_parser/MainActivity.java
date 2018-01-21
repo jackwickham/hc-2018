@@ -10,6 +10,9 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -167,31 +170,53 @@ public class MainActivity extends AppCompatActivity {
 			bmp = BitmapFactory.decodeFile(currentImagePath, options);
 			Parcel parcel = Parcel.obtain();
 			bmp.writeToParcel(parcel, 0);
-			Thread t = new ParserThread(this, parcel.createByteArray());
+
+			final ProgressDialog dialog = showTransactionProgressDialog();
+			Handler h = new Handler(Looper.getMainLooper()) {
+				@Override
+				public void handleMessage(Message msg) {
+					if (msg.what >= 0) {
+						Parser.ExtractedData obj = (Parser.ExtractedData) msg.obj;
+						Dialog editDialog = showTransactionEditDialog(dialog, obj.merchant, obj.totalValue);
+						editDialog.show();
+					}
+					else {
+						// Handle error
+						// TODO: Error dialog - retry/cancel
+					}
+				}
+			};
+
+			Thread t = new ParserThread(parcel.createByteArray(), h);
 			t.start();
+
+
 		}
 	}
 
-	private static class ParserThread extends Thread {
-		MainActivity activity;
+	private class ParserThread extends Thread {
 		byte[] buffer;
-		public ParserThread(MainActivity a, byte[] b) {
-			this.activity = a;
+		Handler handler;
+
+		public ParserThread(byte[] b, Handler h) {
 			this.buffer = b;
+			this.handler = h;
 		}
+
 		@Override
 		public void run() {
+			Message m = Message.obtain(this.handler);
 			try {
-				Parser.ExtractedData dat = Parser.parse(this.buffer);
-				this.activity.addTransaction(new Transaction(dat.merchant, dat.totalValue));
-				ProgressDialog dialog = showTransactionProgressDialog();
-				Dialog editDialog = showTransactionEditDialog(dialog, "Sainsbury's", 2260);
-				editDialog.show();
-			}
-			catch (IOException | JSONException e) {
-				e.printStackTrace();
+				m.obj = Parser.parse(this.buffer);
+				m.what = 0;
+			} catch (IOException | JSONException e) {
+				Log.e("err", "Error", e);
 				// Who needs exception handling?
+				m.what = -1;
 			}
+			m.sendToTarget();
+		}
+	}
 
 	private ProgressDialog showTransactionProgressDialog() {
 		return ProgressDialog.show(this, "Processing", "Analysing your image", true, false);
