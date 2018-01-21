@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class TransactionDatabase {
 
@@ -20,8 +21,19 @@ public class TransactionDatabase {
 
     private static String getFileName() {
         String file = "/data/data/com.hackcambridge.receipt_parser/databases" + DATABASE_NAME;
-        //SQLiteDatabase.deleteDatabase(new java.io.File(file));
+        SQLiteDatabase.deleteDatabase(new java.io.File(file));
         return file;
+    }
+
+    public static void sampleData() {
+        String[] shops = {"Sainsbury's", "Next", "NewLook", "WHSmiths", "Tesco", "Ikea"};
+        int[] categories = {1, 2, 2, 3, 1, 0};
+        Random rand = new Random();
+        for (int i = 0; i < 15; i++) {
+            int index = rand.nextInt(shops.length);
+            Transaction tx = new Transaction(shops[index], rand.nextInt(2000) + 1000, null, categories[index], (System.currentTimeMillis() / 1000L) - rand.nextInt(604800));
+            store(tx);
+        }
     }
 
     //Store one Transaction

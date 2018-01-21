@@ -112,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		TransactionDatabase.sampleData();
+
 		add_new_button = findViewById(R.id.add_new);
 
 		transactionListView = findViewById(R.id.transaction_list);
