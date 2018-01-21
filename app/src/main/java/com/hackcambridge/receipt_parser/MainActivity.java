@@ -25,7 +25,10 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 
 import com.hackcambridge.cognitive.Parser;
 
@@ -168,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
 						editDialog.show();
 					} else {
 						// Handle error
+						// TODO: Allow them to enter it manually instead
 						final AlertDialog.Builder errorDialog = new AlertDialog.Builder(MainActivity.this);
 						errorDialog.setTitle(R.string.processing_error_title);
 						errorDialog.setMessage(R.string.processing_error_message);
@@ -251,6 +255,8 @@ public class MainActivity extends AppCompatActivity {
 		return String.format(Locale.ENGLISH, "%d.%02d", amount / 100, amount % 100);
 	}
 
+	private Category editDialogSelectedCategory;
+
 	private Dialog buildTransactionEditDialog(String shopName, int amount) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Confirm Entry");
@@ -258,8 +264,25 @@ public class MainActivity extends AppCompatActivity {
 		View dialogView = getLayoutInflater().inflate(R.layout.edit_dialog, null);
 		final EditText shopEntryField = ((EditText)dialogView.findViewById(R.id.shop_entry));
 		final EditText amountEntryField = ((EditText)dialogView.findViewById(R.id.amount_entry));
+		final Spinner categorySpinner = dialogView.findViewById(R.id.category_entry);
 		shopEntryField.setText(shopName);
 		amountEntryField.setText(formatAmount(amount));
+		final SpinnerAdapter categorySpinnerAdapter = Category.getSpinnerAdapter(this);
+		categorySpinner.setAdapter(categorySpinnerAdapter);
+
+		// TODO: Get this to choose the best category
+		editDialogSelectedCategory = Category.get(0);
+		categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				editDialogSelectedCategory = Category.get(position);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				editDialogSelectedCategory = Category.get(0);
+			}
+		});
 
 		builder.setView(dialogView)
 				.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
@@ -270,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
 
 						int amount = (int) Math.round(Float.parseFloat(resultAmount) * 100.0);
 
-						addTransaction(new Transaction(resultShopName, amount, currentImagePath));
+						addTransaction(new Transaction(resultShopName, amount, currentImagePath, editDialogSelectedCategory.getId()));
 					}
 				})
 				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -307,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
 
 		@Override
 		public void onBindViewHolder(TransactionListItemHolder holder, int position) {
-			txItemHolder.setTransaction(new Transaction("Test", 1337, null));
+			txItemHolder.setTransaction(new Transaction("Test", 1337, null, 0));
 		}
 
 		@Override
