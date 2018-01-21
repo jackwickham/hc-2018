@@ -42,6 +42,7 @@
 		app:menu="@menu/navigation"/>
 
 	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/add_new"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:src="@drawable/ic_camera_alt_white_24dp"

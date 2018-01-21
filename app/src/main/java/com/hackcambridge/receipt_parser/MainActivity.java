@@ -17,6 +17,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
@@ -36,6 +37,7 @@ import android.widget.SpinnerAdapter;
 
 import com.hackcambridge.cognitive.Parser;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
@@ -46,9 +48,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 	public static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -76,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 	private CategoryAdapter categoryAdapter;
 	private LinearLayout graphView;
 	private String currentImagePath;
+	private FloatingActionButton add_new_button;
 
 	private boolean changePage(int selectedPage) {
 		currentView.setVisibility(View.GONE);
@@ -83,14 +88,19 @@ public class MainActivity extends AppCompatActivity {
 		switch (selectedPage) {
 			case R.id.navigation_transactions:
 				transactionListView.setVisibility(View.VISIBLE);
+				add_new_button.setVisibility(View.VISIBLE);
 				currentView = transactionListView;
 				return true;
 			case R.id.navigation_categories:
 				categoryListView.setVisibility(View.VISIBLE);
+				add_new_button.setVisibility(View.GONE);
 				currentView = categoryListView;
 				return true;
 			case R.id.navigation_graph:
 				graphView.setVisibility(View.VISIBLE);
+				add_new_button.setVisibility(View.GONE);
+				graphView.removeAllViews();
+				graphView.addView(getGraphView());
 				currentView = graphView;
 				return true;
 		}
@@ -101,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		add_new_button = findViewById(R.id.add_new);
 
 		transactionListView = findViewById(R.id.transaction_list);
 		categoryListView = findViewById(R.id.transaction_categories);
@@ -128,17 +140,23 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public GraphView getGraphView() {
-		BarGraphSeries<DataPoint> series = new BarGraphSeries<>(new DataPoint[] {
-				new DataPoint(17546, 5300),
-				new DataPoint(17547, 2155),
-				new DataPoint(17548, 1567),
-				new DataPoint(17549, 3333),
-				new DataPoint(17550, 5731),
-				new DataPoint(17551, 4326),
-				new DataPoint(17552, 3444)
-		});
+		Map<Integer, Integer> data = TransactionDatabase.graphData();
+		List<DataPoint> points = new ArrayList<>();
+		double maxY = 1000.0;
+		int minX = Integer.MAX_VALUE;
+		int maxX = 0;
+		for (Map.Entry<Integer, Integer> entry : data.entrySet()) {
+			points.add(new DataPoint(entry.getKey(), entry.getValue()));
+			maxY = Math.max(maxY, Math.ceil(entry.getValue() / 1000.0) * 1000);
+			minX = Math.min(minX, entry.getKey());
+			maxX = Math.max(maxX, entry.getKey());
+		}
+		DataPoint[] pointsArr = new DataPoint[points.size()];
+		points.toArray(pointsArr);
+		BarGraphSeries<DataPoint> series = new BarGraphSeries<>(pointsArr);
 		series.setSpacing(50);
 		GraphView graphView = new GraphView(this);
+		graphView.addSeries(series);
 		graphView.getGridLabelRenderer().setLabelFormatter(new StaticLabelsFormatter(graphView) {
 			@Override
 			public String formatLabel(double value, boolean isValueX) {
@@ -152,7 +170,13 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		});
-		graphView.addSeries(series);
+		Viewport vp = graphView.getViewport();
+		vp.setYAxisBoundsManual(true);
+		vp.setMinY(0.0);
+		vp.setMaxY(maxY);
+		vp.setXAxisBoundsManual(true);
+		vp.setMinX(minX - 1);
+		vp.setMaxX(maxX + 1);
 		return graphView;
 	}
 
