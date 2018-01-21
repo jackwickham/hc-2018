@@ -23,7 +23,7 @@ public class Parser {
         }
     }
 
-    public static ExtractedData parse(byte[] buffer) throws IOException, JSONException {
+    public static ExtractedData parse(byte[] buffer, MerchantDbLookup callback) throws IOException, JSONException {
         Endpoint endpoint = new Endpoint();
         JSONObject obj = endpoint.post(buffer);
         Log.i("info", obj.toString(4));
@@ -46,6 +46,11 @@ public class Parser {
                     WordObj wordObj = new WordObj(words.getJSONObject(k));
                     if (wordObj.isTotal()) lastTotal = wordObj;
                     else if (wordObj.isAmount()) amounts.add(wordObj);
+                    else if (merchant.equals("")) {
+                        if (callback.lookup(wordObj.value)) {
+                            merchant = wordObj.value;
+                        }
+                    }
                 }
             }
         }
@@ -104,6 +109,10 @@ public class Parser {
             return false;
         }
 
+    }
+
+    public interface MerchantDbLookup {
+        public boolean lookup(String merchant);
     }
 
 }
