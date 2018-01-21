@@ -35,7 +35,7 @@ public class TransactionDatabase {
         transactionRow.put("Shop", t.getShop());
         int amount = t.getAmount();
         transactionRow.put("Amount", amount);
-        transactionRow.put("Category", 0);
+        transactionRow.put("Category", t.getCategory().getId());
         transactionRow.put("ImagePath", t.getImagePath());
         transactionRow.put("date", t.getDate());
 
