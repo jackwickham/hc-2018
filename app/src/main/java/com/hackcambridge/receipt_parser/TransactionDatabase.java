@@ -82,4 +82,18 @@ public class TransactionDatabase {
         c.close();
         return list;
     }
+
+    public static int categoryTotals(int category){
+        if(database == null){
+            database = SQLiteDatabase.openOrCreateDatabase(getFileName(), null);
+            database.execSQL(CREATE_TABLE_TRANSACTIONS);
+        }
+        String[] cols = {"transID", "SUM(Amount)", "category"};
+        String[] args = {Integer.toString(category)};
+        Cursor c = database.query("transactionTable", cols, "Category = ?", args, null, null, "transID DESC");
+        c.moveToNext();
+        int total = c.getInt(1);
+        c.close();
+        return total;
+    }
 }
