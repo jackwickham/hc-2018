@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
 
 						int amount = (int) Math.round(Float.parseFloat(resultAmount) * 100.0);
 
-						addTransaction(new Transaction(resultShopName, amount));
+						addTransaction(new Transaction(resultShopName, amount, null));
 					}
 				})
 				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
 
 		@Override
 		public void onBindViewHolder(TransactionListItemHolder holder, int position) {
-			txItemHolder.setTransaction(new Transaction("Test", 1337));
+			txItemHolder.setTransaction(new Transaction("Test", 1337, null));
 		}
 
 		@Override
