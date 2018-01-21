@@ -11,4 +11,5 @@
 	<string name="processing_error_title">Error</string>
 	<string name="processing_error_message">Failed to extract information from receipt</string>
 	<string name="retry">Retry</string>
+	<string name="enter_manually">Enter manually</string>
 </resources>

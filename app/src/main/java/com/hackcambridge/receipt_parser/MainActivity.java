@@ -192,6 +192,16 @@ public class MainActivity extends AppCompatActivity {
 								switchToCamera();
 							}
 						});
+                        errorDialog.setNeutralButton(R.string.enter_manually, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        dialog.dismiss();
+                                        Dialog editDialog = buildTransactionEditDialog(null, 0);
+                                        editDialog.show();
+                                    }
+                                }
+
+                        );
 
 						errorDialog.show();
 					}
@@ -272,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
 		final TextInputLayout amountEntryLayout = dialogView.findViewById(R.id.amount_entry_layout);
 		final Spinner categorySpinner = dialogView.findViewById(R.id.category_entry);
 		shopEntryField.setText(shopName);
-		amountEntryField.setText(formatAmount(amount));
+		if(amount != 0)	amountEntryField.setText(formatAmount(amount));
 		final SpinnerAdapter categorySpinnerAdapter = Category.getSpinnerAdapter(this);
 		categorySpinner.setAdapter(categorySpinnerAdapter);
 
