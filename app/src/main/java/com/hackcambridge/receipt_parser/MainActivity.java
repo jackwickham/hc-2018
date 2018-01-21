@@ -13,7 +13,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -27,10 +26,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
 import com.hackcambridge.cognitive.Parser;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.StaticLabelsFormatter;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
 
 import org.json.JSONException;
 
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
 	private RecyclerView categoryListView;
 	private List<Transaction> categories;
 	private CategoryAdapter categoryAdapter;
+	private LinearLayout graphView;
 	private String currentImagePath;
 
 	private boolean changePage(int selectedPage) {
@@ -80,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
 				categoryListView.setVisibility(View.VISIBLE);
 				currentView = categoryListView;
 				return true;
+			case R.id.navigation_graph:
+				graphView.setVisibility(View.VISIBLE);
+				currentView = graphView;
+				return true;
 		}
 		return false;
 	}
@@ -91,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
 		transactionListView = findViewById(R.id.transaction_list);
 		categoryListView = findViewById(R.id.transaction_categories);
+		graphView = findViewById(R.id.transaction_graph);
 		currentView = transactionListView;
 
 		BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -104,11 +114,40 @@ public class MainActivity extends AppCompatActivity {
 		categoryAdapter = new CategoryAdapter();
 		categoryListView.setAdapter(categoryAdapter);
 
+		graphView.addView(getGraphView());
+
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 		transactionListView.setLayoutManager(layoutManager);
 
 		RecyclerView.LayoutManager categoryLayoutManager = new LinearLayoutManager(this);
 		categoryListView.setLayoutManager(categoryLayoutManager);
+	}
+
+	public GraphView getGraphView() {
+		BarGraphSeries<DataPoint> series = new BarGraphSeries<>(new DataPoint[] {
+				new DataPoint(1, 5300),
+				new DataPoint(2, 2155),
+				new DataPoint(3, 1567),
+				new DataPoint(4, 3333),
+				new DataPoint(5, 5731),
+				new DataPoint(6, 4326),
+				new DataPoint(7, 3444)
+		});
+		GraphView graphView = new GraphView(this);
+		graphView.getGridLabelRenderer().setLabelFormatter(new StaticLabelsFormatter(graphView) {
+			@Override
+			public String formatLabel(double value, boolean isValueX) {
+				if (isValueX) {
+					// show day for x values
+					return super.formatLabel(value, isValueX);
+				} else {
+					// show currency for y values
+					return "£" + super.formatLabel(value/100, isValueX);
+				}
+			}
+		});
+		graphView.addSeries(series);
+		return graphView;
 	}
 
 	private class TransactionAdapter extends RecyclerView.Adapter<TransactionListItemHolder> {
