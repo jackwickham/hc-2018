@@ -8,4 +8,7 @@
 	<string name="processing_dialog_extra">Analysing your image</string>
 	<string name="save">Save</string>
 	<string name="cancel">Cancel</string>
+	<string name="processing_error_title">Error</string>
+	<string name="processing_error_message">Failed to extract information from receipt</string>
+	<string name="retry">Retry</string>
 </resources>

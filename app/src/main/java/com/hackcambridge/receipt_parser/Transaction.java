@@ -8,10 +8,12 @@ public class Transaction {
 	private String shop;
 	private int amount;
 	private int category;
+	private String imagePath;
 
-	public Transaction(String shop, int amount) {
+	public Transaction(String shop, int amount, String imagePath) {
 		this.shop = shop;
 		this.amount = amount;
+		this.imagePath = imagePath;
 	}
 
 	public String getShop() {
@@ -28,4 +30,8 @@ public class Transaction {
 	public int getAmount() {
 		return amount;
 	}
+
+	public String getImagePath() {
+	    return imagePath;
+    }
 }

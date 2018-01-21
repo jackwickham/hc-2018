@@ -26,7 +26,7 @@ public class Parser {
         JSONObject obj = endpoint.post(buffer);
         Log.i("info", obj.toString(4));
 
-        String merchant = "Unknown";
+        String merchant = "";
         int value = 0;
 
         JSONArray arr = obj.getJSONArray("regions");
