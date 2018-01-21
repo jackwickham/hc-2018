@@ -42,6 +42,10 @@ public class Category {
 		return instances.get(id);
 	}
 
+	public static int numCategories() {
+		return instances.size();
+	}
+
 	public static SpinnerAdapter getSpinnerAdapter(Context context) {
 		ArrayAdapter<Category> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, instances);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 		transactionListView.setLayoutManager(layoutManager);
 
-		RecyclerView.LayoutManager categoryLayoutManager = new LinearLayoutManager(this);
+		RecyclerView.LayoutManager categoryLayoutManager = new GridLayoutManager(this, 2);
 		categoryListView.setLayoutManager(categoryLayoutManager);
 	}
 
@@ -318,24 +319,24 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 
-	private class CategoryAdapter extends RecyclerView.Adapter<TransactionListItemHolder> {
-		private TransactionListItemHolder txItemHolder;
+	private class CategoryAdapter extends RecyclerView.Adapter<CategoryListItemHolder> {
+		private CategoryListItemHolder itemHolder;
 
 		@Override
-		public TransactionListItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-			View viewHolder = getLayoutInflater().inflate(R.layout.transaction_list_item, parent, false);
-			txItemHolder = new TransactionListItemHolder(viewHolder);
-			return txItemHolder;
+		public CategoryListItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+			View viewHolder = getLayoutInflater().inflate(R.layout.category_list_item, parent, false);
+			itemHolder = new CategoryListItemHolder(viewHolder);
+			return itemHolder;
 		}
 
 		@Override
-		public void onBindViewHolder(TransactionListItemHolder holder, int position) {
-			txItemHolder.setTransaction(new Transaction("Test", 1337, null, 0));
+		public void onBindViewHolder(CategoryListItemHolder holder, int position) {
+			itemHolder.setCategory(Category.get(position));
 		}
 
 		@Override
 		public int getItemCount() {
-			return 15;
+			return Category.numCategories();
 		}
 	}
 }
