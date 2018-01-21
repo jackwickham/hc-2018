@@ -157,19 +157,6 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-//			Bitmap imageBitmap = (Bitmap) extras.get("data");
-//			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//			imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//			Thread t = new ParserThread(this, stream.toByteArray());
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			Bitmap bmp = BitmapFactory.decodeFile(currentImagePath, options);
-			options.inSampleSize = Math.min(
-					options.outWidth / 3200,
-					options.outHeight / 3200
-			);
-			bmp = BitmapFactory.decodeFile(currentImagePath, options);
-			Parcel parcel = Parcel.obtain();
-			bmp.writeToParcel(parcel, 0);
 
 			final ProgressDialog dialog = showTransactionProgressDialog();
 			Handler h = new Handler(Looper.getMainLooper()) {
@@ -187,9 +174,25 @@ public class MainActivity extends AppCompatActivity {
 				}
 			};
 
-			Thread t = new ParserThread(parcel.createByteArray(), h);
-			t.start();
+//			Bitmap imageBitmap = (Bitmap) extras.get("data");
+//			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//			imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//			Thread t = new ParserThread(this, stream.toByteArray());
 
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			BitmapFactory.decodeFile(currentImagePath, options);
+			options.inSampleSize = Math.max(
+					(int) Math.pow(2, Math.ceil(Math.log(options.outWidth / 3200.0) / Math.log(2))),
+					(int) Math.pow(2, Math.ceil(Math.log(options.outHeight / 3200.0) / Math.log(2)))
+			);
+			options.inJustDecodeBounds = false;
+			Bitmap bmp = BitmapFactory.decodeFile(currentImagePath, options);
+
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+			Thread t = new ParserThread(stream.toByteArray(), h);
+			t.start();
 
 		}
 	}

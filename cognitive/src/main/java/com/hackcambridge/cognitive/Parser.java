@@ -1,13 +1,12 @@
 package com.hackcambridge.cognitive;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +24,7 @@ public class Parser {
     public static ExtractedData parse(byte[] buffer) throws IOException, JSONException {
         Endpoint endpoint = new Endpoint();
         JSONObject obj = endpoint.post(buffer);
+        Log.i("info", obj.toString(4));
 
         String merchant = "Unknown";
         int value = 0;
