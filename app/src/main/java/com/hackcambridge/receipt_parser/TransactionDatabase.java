@@ -100,23 +100,24 @@ public class TransactionDatabase {
         return total;
     }
 
-    public static Map<Date, Integer> graphData(){
+    public static Map<Integer, Integer> graphData(){
         if(database == null){
             database = SQLiteDatabase.openOrCreateDatabase(getFileName(), null);
             database.execSQL(CREATE_TABLE_TRANSACTIONS);
         }
         String[] cols = {"transID", "Amount", "date"};
         Cursor c = database.query("transactionTable", cols, null, null, null, null, "transID DESC");
-        HashMap<Date, Integer> data = new HashMap<>();
+        HashMap<Integer, Integer> data = new HashMap<>();
+        int today = (int)(System.currentTimeMillis() / 1000L) / 86400;
+        for (int i = 0; i < 7; i++) {
+            data.put(today - i, 0);
+        }
         while(c.moveToNext()) {
             int amount = c.getInt(1);
-            long timestamp = c.getInt(2) * 1000L;
-            Date d = new Date(timestamp);
-            if(data.containsKey(d)) {
-                int total = data.get(d) + amount;
-                data.put(d, total);
-            } else {
-                data.put(d, amount);
+            int day = c.getInt(2) / 86400;
+            if(data.containsKey(day)) {
+                int total = data.get(day) + amount;
+                data.put(day, total);
             }
         }
         c.close();
