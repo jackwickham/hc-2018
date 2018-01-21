@@ -3,6 +3,8 @@
 		  package="com.hackcambridge.receipt_parser">
 
 	<uses-feature android:name="android.hardware.camera" android:required="true" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 	<application
@@ -21,6 +23,15 @@
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
+		<provider
+			android:name="android.support.v4.content.FileProvider"
+			android:authorities="com.hackcambridge.fileprovider"
+			android:exported="false"
+			android:grantUriPermissions="true">
+			<meta-data
+				android:name="android.support.FILE_PROVIDER_PATHS"
+				android:resource="@xml/file_paths"></meta-data>
+		</provider>
 	</application>
 
 </manifest>

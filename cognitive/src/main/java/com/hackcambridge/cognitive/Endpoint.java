@@ -2,6 +2,8 @@ package com.hackcambridge.cognitive;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -9,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class Endpoint {
 
@@ -28,6 +31,14 @@ public class Endpoint {
 
     public JSONObject post(File file) throws IOException, JSONException {
         return post(new FileEntity(file));
+    }
+
+    public JSONObject post(ByteBuffer buffer) throws IOException, JSONException {
+        return post(new ByteArrayEntity(buffer.array()));
+    }
+
+    public JSONObject post(byte[] buffer) throws IOException, JSONException {
+        return post(new ByteArrayEntity(buffer));
     }
 
     public JSONObject post(HttpEntity entity) throws IOException, JSONException {
