@@ -125,21 +125,23 @@ public class MainActivity extends AppCompatActivity {
 
 	public GraphView getGraphView() {
 		BarGraphSeries<DataPoint> series = new BarGraphSeries<>(new DataPoint[] {
-				new DataPoint(1, 5300),
-				new DataPoint(2, 2155),
-				new DataPoint(3, 1567),
-				new DataPoint(4, 3333),
-				new DataPoint(5, 5731),
-				new DataPoint(6, 4326),
-				new DataPoint(7, 3444)
+				new DataPoint(17546, 5300),
+				new DataPoint(17547, 2155),
+				new DataPoint(17548, 1567),
+				new DataPoint(17549, 3333),
+				new DataPoint(17550, 5731),
+				new DataPoint(17551, 4326),
+				new DataPoint(17552, 3444)
 		});
+		series.setSpacing(50);
 		GraphView graphView = new GraphView(this);
 		graphView.getGridLabelRenderer().setLabelFormatter(new StaticLabelsFormatter(graphView) {
 			@Override
 			public String formatLabel(double value, boolean isValueX) {
 				if (isValueX) {
 					// show day for x values
-					return super.formatLabel(value, isValueX);
+					final String[] days = {"Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"};
+					return days[(int) value % 7];//super.formatLabel(value, isValueX);
 				} else {
 					// show currency for y values
 					return "£" + super.formatLabel(value/100, isValueX);
