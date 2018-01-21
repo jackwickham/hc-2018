@@ -17,6 +17,7 @@ import android.os.Parcel;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -264,6 +265,8 @@ public class MainActivity extends AppCompatActivity {
 		View dialogView = getLayoutInflater().inflate(R.layout.edit_dialog, null);
 		final EditText shopEntryField = ((EditText)dialogView.findViewById(R.id.shop_entry));
 		final EditText amountEntryField = ((EditText)dialogView.findViewById(R.id.amount_entry));
+		final TextInputLayout shopEntryLayout = dialogView.findViewById(R.id.shop_entry_layout);
+		final TextInputLayout amountEntryLayout = dialogView.findViewById(R.id.amount_entry_layout);
 		final Spinner categorySpinner = dialogView.findViewById(R.id.category_entry);
 		shopEntryField.setText(shopName);
 		amountEntryField.setText(formatAmount(amount));
@@ -291,9 +294,13 @@ public class MainActivity extends AppCompatActivity {
 						String resultShopName = shopEntryField.getText().toString();
 						String resultAmount = amountEntryField.getText().toString();
 
-						int amount = (int) Math.round(Float.parseFloat(resultAmount) * 100.0);
+						try {
+                            int amount = (int) Math.round(Float.parseFloat(resultAmount) * 100.0);
+                            addTransaction(new Transaction(resultShopName, amount, currentImagePath, editDialogSelectedCategory.getId()));
+                        } catch (NumberFormatException e){
+                            amountEntryLayout.setError("Please enter a number");
+                        }
 
-						addTransaction(new Transaction(resultShopName, amount, currentImagePath, editDialogSelectedCategory.getId()));
 					}
 				})
 				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
