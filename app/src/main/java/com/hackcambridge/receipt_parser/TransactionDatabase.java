@@ -60,4 +60,26 @@ public class TransactionDatabase {
         c.close();
         return list;
     }
+
+    public static List<Transaction> loadCategory(int category){
+        if(database == null){
+            database = SQLiteDatabase.openOrCreateDatabase(getFileName(), null);
+            database.execSQL(CREATE_TABLE_TRANSACTIONS);
+        }
+        ArrayList<Transaction> list = new ArrayList<>();
+        String[] cols = {"transID", "Shop", "Amount", "ImagePath", "date", "category"};
+        String[] args = {Integer.toString(category)};
+        Cursor c = database.query("transactionTable", cols, "Category = ?", args, null, null, "transID DESC");
+        while(c.moveToNext()){
+            String shop = c.getString(1);
+            int amount = c.getInt(2);
+            String imagePath = c.getString(3);
+            long date = c.getLong(4);
+            int cat = c.getInt(5);
+            Transaction t = new Transaction(shop, amount, imagePath, cat, date);
+            list.add(t);
+        }
+        c.close();
+        return list;
+    }
 }

@@ -30,15 +30,13 @@ public class Merchants {
 
     public static void populate(List<Transaction> transactions){
         for(Transaction t : transactions){
-            String shop = t.getShop();
+            String shop = normalise(t.getShop());
             int category = t.getCategory();
             if(contains(shop)){
                 if(!(get(shop) == category)){
-                    shop = shop.replaceAll("[^a-zA-Z ]","").toLowerCase();
                     merchants.put(shop, 0);
                 }
             } else {
-                shop = shop.replaceAll("[^a-zA-Z ]", "").toLowerCase();
                 merchants.put(shop, category);
             }
         }
@@ -46,20 +44,24 @@ public class Merchants {
 
     public static boolean contains(String search){
         //Clean the string
-        search = search.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+        search = normalise(search);
         return merchants.containsKey(search);
     }
 
     public static String search(String search){
-        search = search.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+        search = normalise(search);
         List<String> keys = new ArrayList<>(merchants.keySet());
         int i = Collections.binarySearch(keys, search);
         String result = keys.get(i + 1);
         return result;
     }
 
+    public static String normalise(String s){
+        s = s.replaceAll("[^a-zA-Z ]", "");
+    }
+
     public static int get(String key){
-        key = key.replace("[^a-zA-Z ]","").toLowerCase();
+        key = normalise(key);
         if(!merchants.containsKey(key)) return 0;
         int val = merchants.get(key);
         return val;
