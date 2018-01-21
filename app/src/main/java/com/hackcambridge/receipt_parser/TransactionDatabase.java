@@ -17,7 +17,7 @@ public class TransactionDatabase {
     private static final String DATABASE_NAME = "Transactions.db";
     private static SQLiteDatabase database;
 
-    private static final String CREATE_TABLE_TRANSACTIONS = "CREATE TABLE IF NOT EXISTS transactionTable(TransID INTEGER PRIMARY KEY AUTOINCREMENT , Shop varchar, Amount int, Category int)";
+    private static final String CREATE_TABLE_TRANSACTIONS = "CREATE TABLE IF NOT EXISTS transactionTable(TransID INTEGER PRIMARY KEY AUTOINCREMENT , Shop varchar, Amount int, Category int, ImagePath varchar)";
 
     private static String getFileName() {
         String file = "/data/data/com.hackcambridge.receipt_parser/databases" + DATABASE_NAME;
@@ -37,6 +37,7 @@ public class TransactionDatabase {
         int amount = t.getAmount();
         transactionRow.put("Amount", amount);
         transactionRow.put("Category", 0);
+        transactionRow.put("ImagePath", t.getImagePath());
 
         database.insert("transactionTable", null, transactionRow);
     }
@@ -48,12 +49,13 @@ public class TransactionDatabase {
             database.execSQL(CREATE_TABLE_TRANSACTIONS);
         }
         ArrayList<Transaction> list = new ArrayList<>();
-        String[] cols = {"transID", "Shop", "Amount"};
+        String[] cols = {"transID", "Shop", "Amount", "ImagePath"};
         Cursor c = database.query("transactionTable", cols, null, null, null, null, "transID DESC");
         while(c.moveToNext()){
             String shop = c.getString(1);
             int amount = c.getInt(2);
-            Transaction t = new Transaction(shop, amount);
+            String imagePath = c.getString(3);
+            Transaction t = new Transaction(shop, amount, imagePath);
             list.add(t);
         }
         c.close();
