@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
 
 						int amount = (int) Math.round(Float.parseFloat(resultAmount) * 100.0);
 
-						addTransaction(new Transaction(resultShopName, amount, null));
+						addTransaction(new Transaction(resultShopName, amount, currentImagePath));
 					}
 				})
 				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
