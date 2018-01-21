@@ -28,7 +28,7 @@ public class Merchants {
     public static void populate(List<Transaction> transactions){
         for(Transaction t : transactions){
             String shop = t.getShop();
-            int category = t.getCategory();
+            int category = t.getCategory().getId();
             if(contains(shop)){
                 if(!(get(shop) == category)){
                     shop = shop.replaceAll("[^a-zA-Z ]","").toLowerCase();
