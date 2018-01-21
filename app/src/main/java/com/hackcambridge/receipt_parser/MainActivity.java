@@ -16,7 +16,9 @@ import android.os.Message;
 import android.os.Parcel;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -299,6 +301,8 @@ public class MainActivity extends AppCompatActivity {
                             addTransaction(new Transaction(resultShopName, amount, currentImagePath, editDialogSelectedCategory.getId()));
                         } catch (NumberFormatException e){
                             amountEntryLayout.setError("Please enter a number");
+							Snackbar sb = Snackbar.make(currentView, "Invalid amount", BaseTransientBottomBar.LENGTH_SHORT);
+							sb.show();
                         }
 
 					}
