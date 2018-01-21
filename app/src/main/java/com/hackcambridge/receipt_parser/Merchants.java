@@ -31,7 +31,7 @@ public class Merchants {
     public static void populate(List<Transaction> transactions){
         for(Transaction t : transactions){
             String shop = normalise(t.getShop());
-            int category = t.getCategory();
+            int category = t.getCategory().getId();
             if(contains(shop)){
                 if(!(get(shop) == category)){
                     merchants.put(shop, 0);

@@ -230,7 +230,13 @@ public class MainActivity extends AppCompatActivity {
 		public void run() {
 			Message m = Message.obtain(this.handler);
 			try {
-				m.obj = Parser.parse(this.buffer);
+				Parser.MerchantDbLookup callback = new Parser.MerchantDbLookup() {
+					@Override
+					public boolean lookup(String merchant) {
+						return Merchants.contains(merchant);
+					}
+				};
+				m.obj = Parser.parse(this.buffer, callback);
 				m.what = MSG_SUCCESS;
 			} catch (IOException | JSONException e) {
 				Log.e(TAG, "Error", e);
@@ -264,8 +270,8 @@ public class MainActivity extends AppCompatActivity {
 		final SpinnerAdapter categorySpinnerAdapter = Category.getSpinnerAdapter(this);
 		categorySpinner.setAdapter(categorySpinnerAdapter);
 
-		// TODO: Get this to choose the best category
-		editDialogSelectedCategory = Category.get(0);
+		editDialogSelectedCategory = Category.get(Merchants.get(shopName));
+		categorySpinner.setSelection(editDialogSelectedCategory.getId());
 		categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
