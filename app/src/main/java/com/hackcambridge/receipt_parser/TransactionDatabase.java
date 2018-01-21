@@ -20,8 +20,11 @@ public class TransactionDatabase {
 
     private static String getFileName() {
         String file = "/data/data/com.hackcambridge.receipt_parser/databases" + DATABASE_NAME;
-        //SQLiteDatabase.deleteDatabase(new java.io.File(file));
         return file;
+    }
+
+    public static void clear(){
+        SQLiteDatabase.deleteDatabase(new java.io.File(getFileName()));
     }
 
     //Store one Transaction

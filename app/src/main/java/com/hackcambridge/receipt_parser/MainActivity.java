@@ -231,6 +231,17 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
+	@Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId()) {
+            case R.id.clear_db:
+                TransactionDatabase.clear();
+                transactions.clear();
+                return true;
+        }
+        return false;
+    }
+
 	private class ParserThread extends Thread {
 		byte[] buffer;
 		Handler handler;
