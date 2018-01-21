@@ -57,7 +57,7 @@ public class Merchants {
     }
 
     public static String normalise(String s){
-        s = s.replaceAll("[^a-zA-Z ]", "");
+        return s.replaceAll("[^a-zA-Z ]", "").toLowerCase();
     }
 
     public static int get(String key){
