@@ -23,29 +23,25 @@ public class Parser {
         }
     }
 
-    public static ExtractedData parse(byte[] buffer, MerchantDbLookup callback) throws IOException, JSONException {
-        Endpoint endpoint = new Endpoint();
-        JSONObject obj = endpoint.post(buffer);
-        Log.i("info", obj.toString(4));
+	private static ExtractedData process(List<JSONObject> regions, MerchantDbLookup callback) {
 
         String merchant = "";
         WordObj lastTotal = null;
         List<WordObj> amounts = new ArrayList<>();
 
-        StringBuilder toPrint = new StringBuilder();
-
-        JSONArray arr = obj.getJSONArray("regions");
-        for (int i = 0; i < arr.length(); ++i) {
-            JSONObject o = arr.getJSONObject(i);
+        for (JSONObject o : regions) {
             JSONArray lines = o.getJSONArray("lines");
             for (int j = 0; j < lines.length(); ++j) {
-                toPrint.append("\n");
                 JSONObject line = lines.getJSONObject(j);
                 JSONArray words = line.getJSONArray("words");
                 for (int k = 0; k < words.length(); ++k) {
                     WordObj wordObj = new WordObj(words.getJSONObject(k));
-                    if (wordObj.isTotal()) lastTotal = wordObj;
-                    else if (wordObj.isAmount()) amounts.add(wordObj);
+                    if (wordObj.isTotal()) {
+						lastTotal = wordObj;
+					}
+                    else if (wordObj.isAmount()) {
+						amounts.add(wordObj);
+					}
                     else if (merchant.equals("")) {
                         if (callback.lookup(wordObj.value)) {
                             merchant = wordObj.value;
@@ -56,7 +52,6 @@ public class Parser {
         }
 
         int value = 0;
-
         if (amounts.size() > 0) {
             value = amounts.get(amounts.size() - 1).amount;
         }
@@ -75,6 +70,59 @@ public class Parser {
         }
 
         return new ExtractedData(merchant, value);
+	}
+
+	public static ExtractedData parse(Bitmap hires, MerchantDbLookup callback) throws IOException, JSONException {
+		
+		Endpoint endpoint = new Endpoint();
+
+		final int maxWidth = 3200;
+		final int maxHeight = 3200;
+		final int gridStepWidth = maxWidth * 0.8;
+		final int gridStepHeight = maxHeight * 0.8;
+
+		int gridWidth = Math.ceil(((double)hires.getWidth()) / gridStepWidth);
+		int gridHeight = Math.ceil(((double)hires.getHeight()) / gridStepHeight);
+		
+		List<JSONObject> uberregion = new ArrayList<>();
+		for (int y = 0; y < gridHeight; ++y) {
+			for (int x = 0; x < gridWidth; ++x) {
+				Bitmap tmp = Bitmap.createBitmap(hires, x * gridStepWidth, y * gridStepHeight, maxWidth, maxHeight);
+				ByteArrayOutputStream stream = new ByteArrayOutputStream();
+				tmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+				try {
+					JSONObject obj = endpoint.post(stream.toByteArray());
+					JSONArray arr = obj.getJSONArray("regions");
+					for (int i = 0; i < arr.length(); ++i) {
+						uberregion.add(arr.getJSONObject(i));
+					}
+				}
+				catch (IOException | JSONException e) {
+					Log.e("err", "An error occured", e);
+				}
+			}
+		}
+
+		return process(uberregion, callback);
+
+	}
+
+    public static ExtractedData parse(byte[] buffer, MerchantDbLookup callback) throws IOException, JSONException {
+        Endpoint endpoint = new Endpoint();
+        JSONObject obj = endpoint.post(buffer);
+        Log.i("info", obj.toString(4));
+
+        String merchant = "";
+        WordObj lastTotal = null;
+        List<WordObj> amounts = new ArrayList<>();
+
+        JSONArray arr = obj.getJSONArray("regions");
+		List<JSONObject> regions = new ArrayList<>();
+		for (int i = 0; i < arr.length(); ++i) {
+			regions.add(arr.getJSONObject(i));
+		}
+
+		return process(regions, callback);
     }
 
     private static class WordObj {
