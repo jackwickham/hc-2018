@@ -264,8 +264,8 @@ public class MainActivity extends AppCompatActivity {
 		final SpinnerAdapter categorySpinnerAdapter = Category.getSpinnerAdapter(this);
 		categorySpinner.setAdapter(categorySpinnerAdapter);
 
-		// TODO: Get this to choose the best category
-		editDialogSelectedCategory = Category.get(0);
+		editDialogSelectedCategory = Category.get(Merchants.get(shopName));
+		categorySpinner.setSelection(editDialogSelectedCategory.getId());
 		categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
