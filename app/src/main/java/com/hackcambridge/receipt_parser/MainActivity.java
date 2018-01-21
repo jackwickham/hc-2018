@@ -226,7 +226,13 @@ public class MainActivity extends AppCompatActivity {
 		public void run() {
 			Message m = Message.obtain(this.handler);
 			try {
-				m.obj = Parser.parse(this.buffer);
+				Parser.MerchantDbLookup callback = new Parser.MerchantDbLookup() {
+					@Override
+					public boolean lookup(String merchant) {
+						return Merchants.contains(merchant);
+					}
+				};
+				m.obj = Parser.parse(this.buffer, callback);
 				m.what = MSG_SUCCESS;
 			} catch (IOException | JSONException e) {
 				Log.e(TAG, "Error", e);
