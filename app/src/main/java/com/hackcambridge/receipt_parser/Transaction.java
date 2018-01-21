@@ -37,6 +37,10 @@ public class Transaction {
 		return amount;
 	}
 
+	public int getCategory() {
+	    return category;
+    }
+
 	public String getImagePath() {
 	    return imagePath;
     }

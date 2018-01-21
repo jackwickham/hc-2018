@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/cognitive/cognitive.iml" filepath="$PROJECT_DIR$/cognitive/cognitive.iml" />
-      <module fileurl="file://$PROJECT_DIR$/cognitive/cognitive.iml" filepath="$PROJECT_DIR$/cognitive/cognitive.iml" />
       <module fileurl="file://$PROJECT_DIR$/hc-2018.iml" filepath="$PROJECT_DIR$/hc-2018.iml" />
     </modules>
   </component>
