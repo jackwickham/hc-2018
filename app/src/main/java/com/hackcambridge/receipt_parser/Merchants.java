@@ -3,7 +3,10 @@ package com.hackcambridge.receipt_parser;
 
 import android.widget.TableRow;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class Merchants {
@@ -45,6 +48,14 @@ public class Merchants {
         //Clean the string
         search = search.replaceAll("[^a-zA-Z ]", "").toLowerCase();
         return merchants.containsKey(search);
+    }
+
+    public static String search(String search){
+        search = search.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+        List<String> keys = new ArrayList<>(merchants.keySet());
+        int i = Collections.binarySearch(keys, search);
+        String result = keys.get(i + 1);
+        return result;
     }
 
     public static int get(String key){
